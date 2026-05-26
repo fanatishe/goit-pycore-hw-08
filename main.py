@@ -373,8 +373,9 @@ def add_birthday(args, book: AddressBook):
 
     record = book.find(name)
 
-    if not record:
-        raise KeyError
+    if record is None:
+        record = Record(name)
+        book.add_record(record)
 
     record.add_birthday(date)
     return "Birthday added."
