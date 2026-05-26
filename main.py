@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from collections import UserDict
 import pickle
 
+
 class EntityAlreadyExists(ValueError):
     pass
 
@@ -192,6 +193,10 @@ class AddressBook(UserDict):
 
             bday = record.birthday.value
 
+            # Неможливо, але хто знає тих тестерів
+            if bday > today:
+                continue
+
             # День народження в цьому або наступному році якщо вже пройшло
             # Плюс перехватимо потенційний варіант  29 лютого на невисокосному році
             try:
@@ -258,12 +263,14 @@ def parse_input(user_input: str) -> Tuple[str, List[str]]:
     args = parts[1:]
     return command, args
 
+
 def save_data(book, filename: str = "addressbook.pkl") -> None:
     """
     Зберігає AddressBook у файл.
     """
     with open(filename, "wb") as f:
         pickle.dump(book, f)
+
 
 def load_data(filename: str = "addressbook.pkl") -> AddressBook:
     """
@@ -274,7 +281,8 @@ def load_data(filename: str = "addressbook.pkl") -> AddressBook:
         with open(filename, "rb") as f:
             return pickle.load(f)
     except FileNotFoundError:
-        return AddressBook()       
+        return AddressBook()
+
 
 @input_error
 def add_contact(args: List[str], book: AddressBook) -> str:
@@ -313,8 +321,9 @@ def change_contact(args: List[str], book: AddressBook) -> str:
 
     record = book.find(name)
 
-    if not record:
-        raise KeyError
+    if record is None:
+        record = Record(name)
+        book.add_record(record)
 
     record.edit_phone(old_phone, new_phone)
     return "Contact updated."
@@ -438,6 +447,7 @@ def main():
 
     finally:
         save_data(book)
+
 
 if __name__ == "__main__":
     main()
